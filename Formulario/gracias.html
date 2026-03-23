@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gracias – FleetChofer Fase Piloto</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#000;--fg:#fff;--card:#0a0a0a;
+  --muted:#888;--primary:hsl(0,100%,50%);--primary-rgb:255,0,0;
+  --green:#16f552;--border:rgba(255,0,0,.28);
+  --font-display:'Bebas Neue',cursive;--font-body:'Work Sans',sans-serif;
+  --radius:6px;
+}
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font-family:var(--font-body);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+.glow{pointer-events:none;position:fixed;inset:0;overflow:hidden;z-index:0}
+.glow div{
+  position:absolute;left:50%;top:40%;
+  transform:translate(-50%,-50%);
+  width:600px;height:600px;border-radius:50%;
+  background:rgba(var(--primary-rgb),.04);
+  filter:blur(120px);
+}
+.card{
+  position:relative;z-index:1;
+  text-align:center;
+  max-width:30rem;
+  width:100%;
+  animation:fadeInUp .6s ease;
+}
+.check-circle{
+  width:88px;height:88px;
+  border:2px solid var(--green);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 32px;
+  background:rgba(22,245,82,.08);
+  font-size:36px;
+  box-shadow:0 0 40px rgba(22,245,82,.15);
+}
+.brand{
+  font-family:var(--font-display);
+  font-size:clamp(2.5rem,8vw,3.5rem);
+  letter-spacing:.1em;
+  color:var(--primary);
+  text-shadow:0 0 40px rgba(var(--primary-rgb),.4);
+  margin-bottom:4px;
+}
+.sub{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:6px;
+  color:var(--muted);
+  font-weight:300;
+  margin-bottom:40px;
+}
+.divider{
+  width:40px;height:2px;
+  background:var(--primary);
+  margin:0 auto 32px;
+  opacity:.5;
+}
+.title{
+  font-family:var(--font-display);
+  font-size:clamp(2rem,6vw,2.75rem);
+  letter-spacing:4px;
+  color:var(--fg);
+  margin-bottom:20px;
+}
+.message{
+  font-size:15px;
+  color:var(--muted);
+  line-height:1.75;
+  margin-bottom:16px;
+}
+.highlight{
+  font-size:13px;
+  color:rgba(255,255,255,.4);
+  line-height:1.6;
+  margin-bottom:48px;
+}
+.back-btn{
+  display:inline-block;
+  font-family:var(--font-display);
+  font-size:15px;
+  letter-spacing:3px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted);
+  padding:12px 28px;
+  border-radius:var(--radius);
+  text-decoration:none;
+  transition:all .3s;
+}
+.back-btn:hover{
+  border-color:var(--primary);
+  color:var(--fg);
+  box-shadow:0 0 20px rgba(var(--primary-rgb),.2);
+}
+
+@keyframes fadeInUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<div class="glow"><div></div></div>
+
+<div class="card">
+  <div class="check-circle">✓</div>
+
+  <p class="brand">FLEETCHOFER</p>
+  <p class="sub">Fase Piloto</p>
+
+  <div class="divider"></div>
+
+  <h1 class="title">¡GRACIAS!</h1>
+
+  <p class="message">
+    Tu feedback ha sido enviado correctamente al equipo de FleetChofer.<br>
+    Cada opinión cuenta para construir la mejor plataforma del sector.
+  </p>
+
+  <p class="highlight">
+    Revisaremos tus notas y sugerencias con atención.<br>
+    Si necesitas contactarnos directamente, escríbenos a<br>
+    <span style="color:rgba(255,255,255,.6)">clara@fleetchoferbyclara.com</span>
+  </p>
+
+  <a href="Formulario.html" class="back-btn">VOLVER AL FORMULARIO</a>
+</div>
+
+</body>
+</html>

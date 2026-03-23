@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bloc de Notas – FleetChofer Fase Piloto</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#000;--fg:#fff;--card:#0a0a0a;--input-bg:#141414;
+  --muted:#888;--primary:hsl(0,100%,50%);--primary-rgb:255,0,0;
+  --green:#16f552;--border:rgba(255,0,0,.28);
+  --font-display:'Bebas Neue',cursive;--font-body:'Work Sans',sans-serif;
+  --radius:6px;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);min-height:100vh}
+
+/* ===== INTRO SCREEN ===== */
+.intro-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px}
+.intro-glow{pointer-events:none;position:absolute;inset:0;overflow:hidden}
+.intro-glow div{position:absolute;left:50%;top:33%;transform:translate(-50%,-50%);width:500px;height:500px;border-radius:50%;background:rgba(var(--primary-rgb),.05);filter:blur(120px)}
+.intro-form{position:relative;z-index:10;width:100%;max-width:28rem;animation:fadeInUp .5s ease}
+.intro-brand{margin-bottom:40px;text-align:center}
+.intro-brand h1{font-family:var(--font-display);font-size:clamp(3rem,8vw,3.75rem);letter-spacing:.1em;color:var(--primary);text-shadow:0 0 40px rgba(var(--primary-rgb),.5)}
+.intro-brand .sub{margin-top:4px;font-size:12px;text-transform:uppercase;letter-spacing:6px;color:var(--muted);font-weight:300}
+.intro-brand .desc{margin-top:24px;font-size:14px;color:var(--muted);line-height:1.6;max-width:24rem;margin-left:auto;margin-right:auto}
+.fields{display:flex;flex-direction:column;gap:16px}
+.field-input{width:100%;border-radius:var(--radius);border:1px solid var(--border);background:var(--input-bg);padding:12px 16px;font-size:14px;color:var(--fg);font-family:var(--font-body);outline:none;transition:border-color .2s}
+.field-input:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.15)}
+.field-input::placeholder{color:#555}
+.roles-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.role-btn{border-radius:var(--radius);border:1px solid var(--border);background:transparent;padding:10px 12px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;font-family:var(--font-body);transition:all .2s}
+.role-btn:hover{border-color:rgba(var(--primary-rgb),.5);color:var(--fg)}
+.role-btn.active{border-color:var(--primary);background:rgba(var(--primary-rgb),.15);color:var(--primary)}
+.start-btn{margin-top:32px;width:100%;font-family:var(--font-display);font-size:18px;letter-spacing:3px;border:2px solid var(--primary);background:transparent;color:var(--fg);padding:14px 24px;border-radius:var(--radius);cursor:pointer;transition:all .3s}
+.start-btn:hover:not(:disabled){background:var(--primary);box-shadow:0 0 30px rgba(var(--primary-rgb),.5)}
+.start-btn:disabled{opacity:.3;cursor:not-allowed}
+
+/* ===== NOTEPAD SCREEN ===== */
+.notepad-screen header{position:sticky;top:0;z-index:50;border-bottom:1px solid var(--border);background:rgba(0,0,0,.95);backdrop-filter:blur(16px);padding:12px 16px}
+.notepad-screen header .inner{max-width:48rem;margin:auto;display:flex;justify-content:space-between;align-items:center}
+.notepad-screen header h1{font-family:var(--font-display);font-size:1.25rem;letter-spacing:3px;color:var(--primary)}
+.notepad-screen header .sub{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--muted)}
+.notepad-screen header .user{text-align:right;font-size:12px;color:var(--fg)}
+.notepad-screen header .user span{display:block;font-size:10px;color:var(--muted)}
+.notepad-screen main{max-width:48rem;margin:auto;padding:32px 16px}
+@media(min-width:768px){.notepad-screen main{padding:32px}}
+.intro-text{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:24px}
+.counter{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-top:12px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block}
+.dot-ind{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;display:none}
+.dot-ind.show{display:block}
+.sections-list{display:flex;flex-direction:column;gap:8px}
+.section{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--card);transition:background .2s}
+.section-btn{width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px;background:none;border:none;color:var(--fg);cursor:pointer;text-align:left;font-family:var(--font-body);transition:background .2s}
+.section-btn:hover{background:rgba(var(--primary-rgb),.05)}
+.section-num{font-family:var(--font-display);font-size:18px;color:rgba(var(--primary-rgb),.3);letter-spacing:2px}
+.section-title{flex:1;font-size:14px;font-weight:600}
+.chevron{width:16px;height:16px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.chevron.open{transform:rotate(180deg)}
+.section-body{display:none;border-top:1px solid var(--border);padding:12px 16px 16px;animation:fadeInUp .3s ease}
+.section-body.show{display:block}
+.hint{font-size:12px;color:var(--muted);font-style:italic;margin-bottom:12px}
+textarea{width:100%;min-height:120px;resize:vertical;background:var(--input-bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;font-size:14px;color:var(--fg);font-family:var(--font-body);outline:none;transition:border-color .2s}
+textarea:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(var(--primary-rgb),.15)}
+textarea::placeholder{color:#555}
+.submit-area{margin-top:40px;padding-bottom:48px}
+.submit-btn{width:100%;font-family:var(--font-display);font-size:18px;letter-spacing:3px;border:2px solid var(--primary);background:transparent;color:var(--fg);padding:16px 24px;border-radius:var(--radius);cursor:pointer;transition:all .3s}
+.submit-btn:hover{background:var(--primary);box-shadow:0 0 30px rgba(var(--primary-rgb),.5)}
+.submit-note{text-align:center;font-size:12px;color:var(--muted);margin-top:12px}
+
+.hidden{display:none!important}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<!-- ===== INTRO SCREEN ===== -->
+<div id="introScreen" class="intro-screen">
+  <div class="intro-glow"><div></div></div>
+  <form class="intro-form" onsubmit="startNotepad(event)">
+    <div class="intro-brand">
+      <h1>FLEETCHOFER</h1>
+      <p class="sub">Fase Piloto</p>
+      <p class="desc">Antes de empezar, cuéntanos quién eres para que podamos asociar tus notas.</p>
+    </div>
+    <div class="fields">
+      <input class="field-input" id="fNombre" placeholder="Tu nombre" required>
+      <input class="field-input" id="fEmpresa" placeholder="Nombre de tu empresa" required>
+      <input class="field-input" id="fEmail" type="email" placeholder="Tu email" required>
+      <input type="hidden" id="fRol" value="">
+      <div class="roles-grid">
+        <button type="button" class="role-btn" onclick="pickRole(this,'Empresa logística')">Empresa logística</button>
+        <button type="button" class="role-btn" onclick="pickRole(this,'Chófer')">Chófer</button>
+        <button type="button" class="role-btn" onclick="pickRole(this,'Empresa cargadora')">Empresa cargadora</button>
+        <button type="button" class="role-btn" onclick="pickRole(this,'Otro')">Otro</button>
+      </div>
+    </div>
+    <button type="submit" class="start-btn" id="startBtn" disabled>EMPEZAR BLOC DE NOTAS</button>
+  </form>
+</div>
+
+<!-- ===== NOTEPAD SCREEN ===== -->
+<div id="notepadScreen" class="notepad-screen hidden">
+  <header>
+    <div class="inner">
+      <div>
+        <h1>FLEETCHOFER</h1>
+        <p class="sub">Bloc de Notas — Fase Piloto</p>
+      </div>
+      <div class="user">
+        <span id="headerName" style="font-size:12px;color:#e0e0e0"></span>
+        <span id="headerEmpresa"></span>
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="intro-text" style="animation:fadeInUp .5s ease">
+      <p>Mientras ves la demo, ve apuntando aquí todo lo que piensas sobre cada sección. Al terminar, pulsa el botón de enviar y tu feedback llegará directamente al equipo.</p>
+      <div class="counter"><span class="dot"></span><span id="filledCount">0</span> de 12 secciones con notas</div>
+    </div>
+    <div class="sections-list" id="sections"></div>
+    <div class="submit-area">
+      <button type="button" class="submit-btn" onclick="submitFeedback()">ENVIAR DUDAS Y SUGERENCIAS A FLEETCHOFER</button>
+      <p class="submit-note">Tu feedback se enviará de forma segura al equipo de FleetChofer</p>
+    </div>
+  </main>
+</div>
+
+<!-- ===== FORMSUBMIT FORM (oculto, se envía programáticamente) ===== -->
+<form id="fsForm" action="https://formsubmit.co/clara@fleetchoferbyclara.com" method="POST" style="display:none">
+  <!-- Configuración FormSubmit -->
+  <input type="hidden" name="_subject" value="Feedback FleetChofer - Fase Piloto">
+  <input type="hidden" name="_captcha" value="false">
+  <input type="hidden" name="_template" value="table">
+  <input type="hidden" name="_next" value="gracias.html">
+
+  <!-- Datos del usuario -->
+  <input type="hidden" name="Nombre" id="fs_nombre">
+  <input type="hidden" name="Empresa" id="fs_empresa">
+  <input type="hidden" name="Email" id="fs_email">
+  <input type="hidden" name="Rol" id="fs_rol">
+  <input type="hidden" name="Fecha" id="fs_fecha">
+
+  <!-- Notas por sección (se rellenan dinámicamente) -->
+  <input type="hidden" name="01 - Red Operativa y Vinculaciones" id="fs_s01">
+  <input type="hidden" name="02 - Rutas, Solicitudes y Rutas Urgentes" id="fs_s02">
+  <input type="hidden" name="03 - Reputación e Insignias" id="fs_s03">
+  <input type="hidden" name="04 - CRM" id="fs_s04">
+  <input type="hidden" name="05 - Documentación" id="fs_s05">
+  <input type="hidden" name="06 - Tacógrafo Inteligente" id="fs_s06">
+  <input type="hidden" name="07 - Planificación" id="fs_s07">
+  <input type="hidden" name="08 - Pagos" id="fs_s08">
+  <input type="hidden" name="09 - Comunicación y Notificaciones" id="fs_s09">
+  <input type="hidden" name="10 - Centro de Operaciones" id="fs_s10">
+  <input type="hidden" name="11 - Inteligencia Operativa" id="fs_s11">
+  <input type="hidden" name="12 - Opinión General" id="fs_s12">
+</form>
+
+<script>
+const SECTIONS=[
+{id:"red-operativa",title:"Red Operativa y Vinculaciones",num:"01",fsId:"fs_s01"},
+{id:"rutas",title:"Rutas, Solicitudes y Rutas Urgentes",num:"02",fsId:"fs_s02"},
+{id:"reputacion",title:"Reputación e Insignias",num:"03",fsId:"fs_s03"},
+{id:"crm",title:"CRM",num:"04",fsId:"fs_s04"},
+{id:"documentacion",title:"Documentación",num:"05",fsId:"fs_s05"},
+{id:"tacografo",title:"Tacógrafo Inteligente",num:"06",fsId:"fs_s06"},
+{id:"planificacion",title:"Planificación",num:"07",fsId:"fs_s07"},
+{id:"pagos",title:"Pagos",num:"08",fsId:"fs_s08"},
+{id:"comunicacion",title:"Comunicación y Notificaciones",num:"09",fsId:"fs_s09"},
+{id:"centro-operaciones",title:"Centro de Operaciones",num:"10",fsId:"fs_s10"},
+{id:"inteligencia",title:"Inteligencia Operativa",num:"11",fsId:"fs_s11"},
+{id:"opinion",title:"Opinión General",num:"12",fsId:"fs_s12"}
+];
+const HINT="Escribe aquí dudas, cosas que no entiendas, cosas que mejorarías o si esto lo usarías en tu empresa.";
+let user={};
+
+function checkValid(){
+  const n=document.getElementById('fNombre').value.trim();
+  const e=document.getElementById('fEmpresa').value.trim();
+  const em=document.getElementById('fEmail').value.trim();
+  const r=document.getElementById('fRol').value;
+  document.getElementById('startBtn').disabled=!(n&&e&&em&&r);
+}
+document.getElementById('fNombre').addEventListener('input',checkValid);
+document.getElementById('fEmpresa').addEventListener('input',checkValid);
+document.getElementById('fEmail').addEventListener('input',checkValid);
+
+function pickRole(btn,role){
+  document.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('fRol').value=role;
+  checkValid();
+}
+
+function startNotepad(e){
+  e.preventDefault();
+  user={
+    nombre:document.getElementById('fNombre').value.trim(),
+    empresa:document.getElementById('fEmpresa').value.trim(),
+    email:document.getElementById('fEmail').value.trim(),
+    rol:document.getElementById('fRol').value
+  };
+  document.getElementById('headerName').textContent=user.nombre;
+  document.getElementById('headerEmpresa').textContent=user.empresa;
+  buildSections();
+  document.getElementById('introScreen').classList.add('hidden');
+  document.getElementById('notepadScreen').classList.remove('hidden');
+}
+
+function buildSections(){
+  const c=document.getElementById('sections');
+  SECTIONS.forEach((s,i)=>{
+    const div=document.createElement('div');div.className='section';
+    div.style.animationDelay=i*40+'ms';
+    div.innerHTML=`<button type="button" class="section-btn" onclick="toggleSection('${s.id}')">
+      <span class="section-num">${s.num}</span>
+      <span class="section-title">${s.title}</span>
+      <span class="dot-ind" id="dot-${s.id}"></span>
+      <svg class="chevron" id="chev-${s.id}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="section-body" id="body-${s.id}">
+      <p class="hint">${HINT}</p>
+      <textarea id="text-${s.id}" placeholder="Escribe aquí..." oninput="updateCount()"></textarea>
+    </div>`;
+    c.appendChild(div);
+  });
+}
+
+function toggleSection(id){
+  const b=document.getElementById('body-'+id);
+  const ch=document.getElementById('chev-'+id);
+  b.classList.toggle('show');
+  ch.classList.toggle('open');
+}
+
+function updateCount(){
+  let count=0;
+  SECTIONS.forEach(s=>{
+    const v=(document.getElementById('text-'+s.id)?.value||'').trim();
+    const dot=document.getElementById('dot-'+s.id);
+    if(v){count++;dot.classList.add('show')}else{dot.classList.remove('show')}
+  });
+  document.getElementById('filledCount').textContent=count;
+}
+
+function submitFeedback(){
+  // Rellenar campos ocultos del formulario FormSubmit con los datos del usuario
+  document.getElementById('fs_nombre').value = user.nombre;
+  document.getElementById('fs_empresa').value = user.empresa;
+  document.getElementById('fs_email').value = user.email;
+  document.getElementById('fs_rol').value = user.rol;
+  document.getElementById('fs_fecha').value = new Date().toLocaleString('es-ES');
+
+  // Rellenar cada sección con su nota (o indicar que está vacía)
+  SECTIONS.forEach(s=>{
+    const val = (document.getElementById('text-'+s.id)?.value||'').trim();
+    document.getElementById(s.fsId).value = val || '(Sin notas)';
+  });
+
+  // Enviar el formulario oculto a FormSubmit
+  document.getElementById('fsForm').submit();
+}
+</script>
+</body>
+</html>
