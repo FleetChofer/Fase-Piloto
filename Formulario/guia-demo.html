@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FleetChofer by Clara — Guía de Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#FF0000;--red-dim:rgba(255,0,0,.15);--red-glow:rgba(255,0,0,.5);
+  --green:#33FD00;--orange:#FF4400;
+  --bg:#000000;--bg1:#0a0a0a;--bg2:#141414;--bg3:#1a1a1a;
+  --border:rgba(255,0,0,.28);--text:#ffffff;--text-dim:#888;
+  --bebas:'Bebas Neue',cursive;--work:'Work Sans',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--work);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ── PARTICLES ── */
+#particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden;}
+.spark{position:absolute;bottom:-10px;border-radius:50%;animation:rise linear infinite;opacity:0;}
+@keyframes rise{0%{transform:translateY(0) scale(1);opacity:.85}50%{opacity:.5}100%{transform:translateY(-100vh) scale(0);opacity:0}}
+
+/* ── INTRO ── */
+#intro{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;transition:opacity .8s ease,visibility .8s ease;}
+#intro.hidden{opacity:0;visibility:hidden;}
+.intro-logo{width:140px;height:140px;border-radius:50%;filter:drop-shadow(0 0 60px var(--red));animation:floatY 4s ease-in-out infinite,glowP 3s ease-in-out infinite;margin-bottom:2.5rem;}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+@keyframes glowP{0%,100%{filter:drop-shadow(0 0 40px var(--red))}50%{filter:drop-shadow(0 0 90px var(--red)) drop-shadow(0 0 130px rgba(255,80,0,.6))}}
+.intro-brand{font-family:var(--bebas);font-size:clamp(4rem,10vw,7rem);color:var(--red);text-shadow:0 0 40px var(--red-glow);letter-spacing:4px;line-height:1;}
+.intro-sub{font-size:1rem;color:var(--text-dim);letter-spacing:6px;text-transform:uppercase;margin:.5rem 0 2.5rem;font-weight:300;}
+.intro-tagline{font-size:1rem;color:#ccc;font-weight:300;max-width:460px;line-height:1.7;margin-bottom:2.5rem;}
+.btn-start{font-family:var(--bebas);letter-spacing:3px;font-size:1.4rem;padding:1rem 3.5rem;border:2px solid var(--red);background:transparent;color:var(--text);cursor:pointer;border-radius:4px;position:relative;overflow:hidden;transition:all .3s ease;}
+.btn-start::before{content:'';position:absolute;inset:0;background:var(--red);transform:translateX(-101%);transition:transform .3s ease;z-index:-1;}
+.btn-start:hover::before{transform:translateX(0)}
+.btn-start:hover{box-shadow:0 0 30px var(--red-glow);letter-spacing:5px;}
+
+/* ── APP ── */
+#app{display:none;min-height:100vh;flex-direction:column;}
+#app.visible{display:flex;}
+
+/* ── TOPBAR ── */
+#topbar{position:sticky;top:0;z-index:100;background:rgba(0,0,0,.97);border-bottom:1px solid var(--border);padding:.75rem 1.5rem;display:flex;align-items:center;gap:1.25rem;backdrop-filter:blur(20px);}
+.tb-logo{width:34px;height:34px;border-radius:50%;filter:drop-shadow(0 0 12px var(--red));flex-shrink:0;}
+.tb-brand{font-family:var(--bebas);font-size:1.4rem;color:var(--red);letter-spacing:2px;white-space:nowrap;}
+.progress-wrap{flex:1;display:flex;flex-direction:column;gap:.3rem;}
+.progress-label{font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:2px;display:flex;justify-content:space-between;}
+.progress-bar-track{height:3px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,#FF4400,var(--red),#FF6600);border-radius:99px;transition:width .5s ease;box-shadow:0 0 8px var(--red-glow);}
+.tb-btn{font-family:var(--bebas);font-size:.85rem;letter-spacing:1px;padding:.4rem .9rem;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;transition:all .25s ease;white-space:nowrap;}
+.tb-btn:hover{border-color:var(--red);color:var(--red);}
+.tb-btn.paused{border-color:rgba(255,200,0,.6);color:#FFD700;}
+
+/* ── LAYOUT ── */
+#layout{display:flex;flex:1;min-height:0;}
+
+/* ── SIDEBAR ── */
+#sidebar{width:270px;flex-shrink:0;background:var(--bg1);border-right:1px solid var(--border);padding:1.25rem .9rem;overflow-y:auto;position:sticky;top:57px;height:calc(100vh - 57px);}
+#sidebar::-webkit-scrollbar{width:3px;}
+#sidebar::-webkit-scrollbar-thumb{background:rgba(255,0,0,.3);border-radius:2px;}
+.sidebar-title{font-family:var(--bebas);font-size:.7rem;color:var(--text-dim);letter-spacing:3px;text-transform:uppercase;margin-bottom:1rem;padding-left:.4rem;}
+.nav-item{display:flex;align-items:flex-start;gap:.65rem;padding:.55rem .65rem;border-radius:4px;border:1px solid transparent;cursor:pointer;transition:all .2s ease;margin-bottom:.2rem;}
+.nav-item:hover{background:var(--red-dim);border-color:var(--border);}
+.nav-item.active{background:rgba(255,0,0,.1);border-color:var(--red);box-shadow:inset 3px 0 0 var(--red),0 0 14px var(--red-dim);}
+.nav-item.done .nav-num{background:var(--green);color:#000;border-color:var(--green);}
+.nav-item.done .nav-text{color:var(--text-dim);}
+.nav-num{width:24px;height:24px;border-radius:3px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--bebas);font-size:.85rem;letter-spacing:0;flex-shrink:0;transition:all .2s;color:var(--text-dim);}
+.nav-item.active .nav-num{border-color:var(--red);color:var(--red);box-shadow:0 0 8px var(--red-dim);}
+.nav-text{font-size:.78rem;line-height:1.3;color:#bbb;font-weight:400;}
+.nav-item.active .nav-text{color:var(--text);font-weight:600;}
+.nav-dot{width:5px;height:5px;border-radius:50%;background:var(--red);flex-shrink:0;margin-top:9px;box-shadow:0 0 6px var(--red);animation:pd 2s infinite;display:none;}
+.nav-item.active .nav-dot{display:block;}
+@keyframes pd{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ── MAIN ── */
+#main{flex:1;overflow-y:auto;padding:2rem 2.5rem;min-width:0;}
+#main::-webkit-scrollbar{width:5px;}
+#main::-webkit-scrollbar-thumb{background:rgba(255,0,0,.2);border-radius:3px;}
+
+/* ── SECTIONS ── */
+.section{display:none;animation:sIn .45s ease;}
+.section.active{display:block;}
+@keyframes sIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SECTION HEADER ── */
+.sec-header{display:flex;align-items:flex-start;gap:1.5rem;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);}
+.sec-num{font-family:var(--bebas);font-size:4.5rem;line-height:1;color:rgba(255,0,0,.13);flex-shrink:0;letter-spacing:2px;}
+.sec-eyebrow{font-size:.68rem;color:var(--red);text-transform:uppercase;letter-spacing:4px;margin-bottom:.4rem;font-weight:600;}
+.sec-title{font-family:var(--bebas);font-size:clamp(1.8rem,3.5vw,2.8rem);color:var(--text);letter-spacing:2px;line-height:1.1;}
+
+/* ══════════════════════════════════════════════
+   CARDS — 3 tipos
+══════════════════════════════════════════════ */
+
+/* TIPO 1 — Estándar: fondo transparente, borde rojo */
+.card{
+  background:transparent;
+  border:1px solid rgba(255,0,0,.28);
+  border-radius:5px;padding:1.4rem 1.6rem;margin-bottom:1.1rem;
+  transition:all .3s ease;
+}
+.card:hover{
+  border-color:var(--red);
+  box-shadow:0 0 24px rgba(255,0,0,.1),inset 0 0 24px rgba(255,0,0,.03);
+  transform:translateY(-2px);
+}
+.card-title{font-family:var(--bebas);font-size:1.15rem;letter-spacing:2px;margin-bottom:.9rem;display:flex;align-items:center;gap:.65rem;color:var(--text);}
+.card-icon{font-size:1.2rem;}
+.card p{font-size:.88rem;line-height:1.8;color:#ccc;font-weight:300;}
+.card p+p{margin-top:.65rem;}
+
+/* TIPO 2 — Visual: fondo gris, para insignias, perfiles, canales, casos */
+.card-visual{background:var(--bg2);border:1px solid rgba(255,255,255,.07);}
+.card-visual:hover{border-color:rgba(255,0,0,.35);box-shadow:0 0 20px rgba(255,0,0,.07);transform:translateY(-2px);}
+
+/* TIPO 3 — Importante: borde rojo intenso, glow fuerte */
+.card-important{background:transparent;border:1px solid rgba(255,0,0,.5);box-shadow:0 0 30px rgba(255,0,0,.07),inset 0 0 30px rgba(255,0,0,.03);}
+.card-important:hover{border-color:var(--red);box-shadow:0 0 45px rgba(255,0,0,.18),inset 0 0 40px rgba(255,0,0,.05);transform:translateY(-2px);}
+
+/* QUOTE — línea lateral */
+.quote{
+  border-left:3px solid var(--red);
+  padding:.65rem 1.1rem;
+  background:rgba(255,0,0,.03);
+  border-radius:0 4px 4px 0;
+  font-size:.85rem;color:#ccc;line-height:1.7;
+  font-style:italic;margin:1rem 0;
+}
+
+/* ── STEPS ── */
+.steps{display:flex;flex-direction:column;gap:.65rem;margin-top:.9rem;}
+.step{display:flex;align-items:flex-start;gap:.9rem;padding:.65rem .9rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:4px;transition:all .2s;}
+.step:hover{border-color:rgba(255,0,0,.25);}
+.step-num{width:26px;height:26px;border-radius:3px;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--bebas);font-size:.95rem;flex-shrink:0;box-shadow:0 0 10px var(--red-dim);}
+.step-text{font-size:.865rem;color:#ccc;line-height:1.65;}
+.step-text strong{color:var(--text);font-weight:700;}
+
+/* ── BADGE GRID ── */
+.badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.9rem;margin-top:.9rem;}
+.badge-card{background:var(--bg3);border:1px solid rgba(255,255,255,.05);border-radius:4px;padding:.9rem;transition:all .3s;}
+.badge-card:hover{transform:translateY(-3px);}
+.badge-card.positive{border-color:rgba(51,253,0,.18);}
+.badge-card.positive:hover{border-color:var(--green);box-shadow:0 0 18px rgba(51,253,0,.07);}
+.badge-card.negative{border-color:rgba(255,68,0,.18);}
+.badge-card.negative:hover{border-color:var(--orange);box-shadow:0 0 18px rgba(255,68,0,.07);}
+.badge-card.platform{border-color:rgba(255,215,0,.18);}
+.badge-card.platform:hover{border-color:#FFD700;box-shadow:0 0 18px rgba(255,215,0,.07);}
+.badge-name{font-family:var(--bebas);font-size:.95rem;letter-spacing:1px;margin-bottom:.4rem;}
+.badge-card.positive .badge-name{color:var(--green);}
+.badge-card.negative .badge-name{color:var(--orange);}
+.badge-card.platform .badge-name{color:#FFD700;}
+.badge-desc{font-size:.78rem;color:var(--text-dim);line-height:1.5;}
+.badge-section-label{font-family:var(--bebas);font-size:.82rem;letter-spacing:2px;margin-bottom:.65rem;margin-top:1.1rem;}
+
+/* ── CASES ── */
+.cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.9rem;margin-top:.9rem;}
+.case-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,0,0,.2);border-radius:4px;padding:1.1rem;position:relative;overflow:hidden;transition:all .3s;}
+.case-card:hover{transform:translateY(-3px);border-color:rgba(255,0,0,.45);}
+.case-num{font-family:var(--bebas);font-size:2.8rem;color:rgba(255,0,0,.1);position:absolute;top:.4rem;right:.65rem;letter-spacing:2px;line-height:1;}
+.case-title{font-family:var(--bebas);font-size:1.05rem;letter-spacing:1px;color:var(--red);margin-bottom:.4rem;}
+.case-text{font-size:.82rem;color:#aaa;line-height:1.6;}
+
+/* ── PROFILE ── */
+.profile-preview{background:var(--bg3);border:1px solid rgba(255,255,255,.07);border-radius:5px;padding:1.25rem;margin-top:.9rem;}
+.profile-stars{display:flex;align-items:center;gap:.5rem;margin-bottom:.65rem;}
+.stars{color:#FFD700;font-size:1.1rem;letter-spacing:1px;}
+.rating{font-family:var(--bebas);font-size:1.4rem;color:#FFD700;}
+.profile-row{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.65rem;}
+.profile-tag{padding:.2rem .65rem;border-radius:3px;font-size:.7rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+.tag-green{background:rgba(51,253,0,.08);border:1px solid rgba(51,253,0,.25);color:var(--green);}
+.tag-gold{background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.25);color:#FFD700;}
+.tag-zero{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--text-dim);}
+
+/* ── PAYMENTS ── */
+.payment-states{display:flex;flex-wrap:wrap;gap:.65rem;margin-top:.9rem;}
+.pay-state{padding:.4rem .9rem;border-radius:3px;font-size:.78rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:.4rem;}
+.pay-pending{background:rgba(255,200,0,.08);border:1px solid rgba(255,200,0,.25);color:#FFD700;}
+.pay-retained{background:rgba(255,120,0,.08);border:1px solid rgba(255,120,0,.25);color:#FF8800;}
+.pay-released{background:rgba(51,253,0,.08);border:1px solid rgba(51,253,0,.25);color:var(--green);}
+.pay-completed{background:rgba(255,0,0,.08);border:1px solid rgba(255,0,0,.25);color:var(--red);}
+
+/* ── CHANNELS ── */
+.channels{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.9rem;margin-top:.9rem;}
+.channel{background:rgba(255,255,255,.02);border:1px solid rgba(255,0,0,.2);border-radius:4px;padding:1.1rem;text-align:center;transition:all .3s;}
+.channel:hover{transform:translateY(-3px);border-color:rgba(255,0,0,.45);}
+.channel-icon{font-size:1.8rem;margin-bottom:.65rem;}
+.channel-name{font-family:var(--bebas);font-size:1.05rem;letter-spacing:1px;margin-bottom:.4rem;color:var(--red);}
+.channel-desc{font-size:.78rem;color:var(--text-dim);line-height:1.5;}
+
+/* ── INTEL GRID ── */
+.intel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.9rem;margin-top:.9rem;}
+.intel-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,0,0,.2);border-radius:4px;padding:1.1rem;transition:all .3s;}
+.intel-card:hover{transform:translateY(-3px);border-color:rgba(255,0,0,.45);}
+.intel-icon{font-size:1.4rem;margin-bottom:.65rem;}
+.intel-title{font-family:var(--bebas);font-size:.95rem;letter-spacing:1px;color:var(--red);margin-bottom:.4rem;}
+.intel-text{font-size:.78rem;color:var(--text-dim);line-height:1.5;}
+
+/* ── PILLARS ── */
+.pillars{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.9rem;margin-top:.9rem;}
+.pillar{background:transparent;border:1px solid rgba(255,0,0,.28);border-radius:5px;padding:1.1rem;transition:all .3s;position:relative;overflow:hidden;}
+.pillar::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--red);transform:scaleX(0);transition:transform .3s;}
+.pillar:hover::before{transform:scaleX(1)}
+.pillar:hover{transform:translateY(-4px);box-shadow:0 10px 35px rgba(255,0,0,.1);}
+.pillar-icon{font-size:1.6rem;margin-bottom:.65rem;}
+.pillar-title{font-family:var(--bebas);font-size:1.05rem;letter-spacing:1px;color:var(--red);margin-bottom:.4rem;}
+.pillar-text{font-size:.82rem;color:#aaa;line-height:1.6;}
+
+/* ── UTILS ── */
+.divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,0,0,.3),transparent);margin:1.25rem 0;}
+.warn-box{background:rgba(255,0,0,.05);border:1px solid rgba(255,0,0,.25);border-radius:4px;padding:.9rem 1.1rem;display:flex;align-items:flex-start;gap:.65rem;font-size:.85rem;color:#eee;line-height:1.6;}
+.warn-icon{font-size:1.1rem;flex-shrink:0;margin-top:.1rem;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;}
+.col-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,0,0,.2);border-radius:4px;padding:.9rem;}
+.col-label{font-family:var(--bebas);font-size:.85rem;letter-spacing:1px;margin-bottom:.45rem;color:var(--red);}
+.col-text{font-size:.82rem;color:#aaa;line-height:1.6;}
+.red-label{font-family:var(--bebas);font-size:.85rem;letter-spacing:1px;margin-bottom:.45rem;color:var(--red);}
+
+/* ── OPCIÓN 2 — Llamada constante, glow rojo permanente ── */
+.opcion2-box{
+  border:1px solid rgba(255,0,0,.55);
+  border-radius:4px;padding:.9rem;margin-top:.5rem;
+  background:rgba(255,0,0,.04);
+  box-shadow:0 0 28px rgba(255,0,0,.18),inset 0 0 28px rgba(255,0,0,.05);
+}
+
+/* ── CONTACT ── */
+.contact-card{background:transparent;border:1px solid rgba(255,0,0,.35);border-radius:6px;padding:2rem;text-align:center;margin-top:1.4rem;box-shadow:0 0 40px rgba(255,0,0,.06);}
+.contact-title{font-family:var(--bebas);font-size:1.8rem;color:var(--red);letter-spacing:3px;margin-bottom:1.25rem;text-shadow:0 0 20px rgba(255,0,0,.4);}
+.contact-items{display:flex;flex-wrap:wrap;justify-content:center;gap:1.25rem;}
+.contact-item{display:flex;align-items:center;gap:.65rem;font-size:.9rem;color:#ccc;}
+.tagline-footer{text-align:center;padding:2rem 0 1rem;font-family:var(--bebas);font-size:.95rem;letter-spacing:4px;color:rgba(255,0,0,.25);}
+
+/* ── BOTTOM NAV ── */
+#bottomnav{position:sticky;bottom:0;background:rgba(0,0,0,.97);border-top:1px solid var(--border);padding:.9rem 2.5rem;display:flex;align-items:center;gap:1rem;backdrop-filter:blur(20px);}
+.nav-btn{font-family:var(--bebas);letter-spacing:2px;font-size:.95rem;padding:.55rem 1.75rem;border-radius:4px;cursor:pointer;transition:all .3s ease;border:1px solid;display:flex;align-items:center;gap:.45rem;}
+.nav-btn-prev{background:transparent;border-color:var(--border);color:var(--text-dim);}
+.nav-btn-prev:hover:not(:disabled){border-color:var(--red);color:var(--red);}
+.nav-btn-prev:disabled{opacity:.3;cursor:not-allowed;}
+.nav-btn-next{background:var(--red);border-color:var(--red);color:#fff;margin-left:auto;box-shadow:0 0 20px rgba(255,0,0,.28);}
+.nav-btn-next:hover:not(:disabled){background:#cc0000;box-shadow:0 0 28px var(--red-glow);transform:translateX(3px);}
+.nav-btn-next:disabled{background:rgba(255,255,255,.07);border-color:transparent;color:var(--text-dim);box-shadow:none;cursor:not-allowed;transform:none;}
+.sec-counter{font-family:var(--bebas);font-size:1.1rem;color:var(--text-dim);letter-spacing:2px;flex:1;text-align:center;}
+.sec-counter span{color:var(--red);}
+
+@media(max-width:900px){#sidebar{display:none;}.two-col{grid-template-columns:1fr;}}
+@media(max-width:600px){#main{padding:1.1rem .9rem;}#bottomnav{padding:.7rem .9rem;}.tb-brand{display:none;}}
+</style>
+</head>
+<body>
+
+<div id="particles"></div>
+
+<!-- INTRO -->
+<div id="intro">
+  <img class="intro-logo" src="https://www.fleetchoferbyclara.com/logo_new.png" alt="FleetChofer" onerror="this.style.display='none'">
+  <div class="intro-brand">FleetChofer</div>
+  <div class="intro-sub">by Clara · Guía Interactiva de Demo</div>
+  <p class="intro-tagline">Bienvenidos a la fase piloto. Esta guía te acompañará paso a paso mientras recorres la demo, para que entiendas cada parte con calma.</p>
+  <button class="btn-start" onclick="startApp()">▶ &nbsp;COMENZAR LA GUÍA</button>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <div id="topbar">
+    <img class="tb-logo" src="https://www.fleetchoferbyclara.com/logo_new.png" alt="" onerror="this.style.display='none'">
+    <span class="tb-brand">FleetChofer</span>
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="progress-section">Introducción</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+    <button class="tb-btn" id="btn-pause" onclick="togglePause()">⏸ Pausar</button>
+  </div>
+
+  <div id="layout">
+    <div id="sidebar">
+      <div class="sidebar-title">Índice de la Guía</div>
+      <div id="nav-items"></div>
+    </div>
+
+    <div id="main">
+
+<!-- ══════ SECCIÓN 0: BIENVENIDA ══════ -->
+<div class="section active" data-index="0">
+  <div class="sec-header">
+    <div class="sec-num">00</div>
+    <div>
+      <div class="sec-eyebrow">Bienvenida</div>
+      <div class="sec-title">Guía de Recorrido por la Demo de FleetChofer by Clara</div>
+    </div>
+  </div>
+
+  <!-- CAMBIO 1: intro-card → card estándar (cuadrado completo, sin barra lateral) -->
+  <div class="card">
+    <p>Bienvenidos a la fase piloto. Para que puedas entender bien cómo funciona FleetChofer by Clara, en esta guía voy a acompañarte paso a paso mientras recorres la demo. La idea es que puedas ir viendo cada parte de la plataforma con calma, entender para qué sirve cada servicio y cómo encajan todos los roles dentro del mismo ecosistema.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="card-icon">✨</span> Antes de empezar</div>
+    <p>Antes de empezar, quiero pedirte que nos disculpes: como te decimos, estamos todavía empezando a construirnos. No le hagas demasiado caso a la estética actual de la demo; ahora mismo parece un poco caótica con tanto color mezclado, pero lo que queremos es que veas el objetivo general de la estructura.</p>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="card-icon">🎯</span> Por qué esta demo</div>
+    <p>Te mostramos esta demo porque, cuando intentamos explicar FleetChofer solo con palabras, siempre nos quedamos cortos. Es una herramienta tan extensa y con tantas soluciones que la mejor forma de entenderla es viéndola. Mientras la vas explorando, te animo a que apuntes cualquier duda que te surja y también cualquier idea que pienses que podría mejorar la herramienta en tu día a día.</p>
+  </div>
+  <div class="card card-important">
+    <div class="card-title"><span class="card-icon">💡</span> Tu opinión importa más que nada</div>
+    <p>Tu opinión real es lo más importante para nosotros: no queremos imponer una forma de trabajar, queremos que esta plataforma se adapte a ti y a tu funcionalidad diaria.</p>
+  </div>
+</div>
+
+<!-- ══════ SECCIÓN 1: RED OPERATIVA ══════ -->
+<div class="section" data-index="1">
+  <div class="sec-header">
+    <div class="sec-num">01</div>
+    <div>
+      <div class="sec-eyebrow">Primer paso</div>
+      <div class="sec-title">Lo primero que se debe hacer al entrar: crear tu red operativa</div>
+    </div>
+  </div>
+
+  <!-- CAMBIO 2: intro-card → card estándar -->
+  <div class="card">
+    <p>Cuando empieces, verás que la clave de todo son las vinculaciones. En FleetChofer, aceptar un perfil no es como agregar a un "amigo" en una red social; es crear una vinculación operativa real.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="card-icon">🔗</span> El paso a paso es muy sencillo y natural</div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Encuentras perfiles:</strong> Verás empresas, chóferes y otros profesionales del sector. Y envías o te envían solicitud.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Miras su reputación e información básica:</strong> Mira cómo trabajan de verdad.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Conectas:</strong> Si te encaja, lo aceptas y ese perfil pasa directamente a tu CRM FleetChofer by Clara. Desde ahí, ya conectas con toda su documentación, publicaciones, ruta... y todo el perfil de ese nuevo contacto para empezar a trabajar juntos de forma fluida.</div></div>
+    </div>
+  </div>
+  <div class="card card-important">
+    <div class="card-title"><span class="card-icon">🎯</span> Prospección: Adiós a las llamadas a ciegas</div>
+    <p>Además, esta forma de trabajar cambia algo que en el sector consume muchísimo tiempo: cambia la prospección. Seguramente te ha pasado lo de pasarte horas al teléfono intentando averiguar quién es la persona adecuada en una empresa, negociaciones interminables…</p>
+    <p>Aquí te ahorras todo ese tiempo. Como ya tienes a la vista la reputación y la actividad de cada perfil, decides con quién colaborar con muchísima más tranquilidad y seguridad. Es una forma de buscar partners mucho más directa y menos estresante.</p>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="card-icon">✨</span> Un pequeño consejo...</div>
+    <p>Por eso, el primer paso no es correr a mirar las rutas como si se fueran a escapar. Lo ideal es dedicar un momento a construir esa red útil de chóferes, transportistas y empresas cargadoras. Más contactos, más cubierto.</p>
+    <p>Al final, en logística ya sabemos cómo es el día a día: nunca sabes qué te va a hacer falta primero, si un sustituto o una carga de vuelta. Tener ese "circuito" ya montado es lo que hace que, cuando necesites algo de verdad, la plataforma te dé una respuesta inmediata.</p>
+  </div>
+</div>
+
+<!-- ══════ SECCIÓN 2: RUTAS ══════ -->
+<div class="section" data-index="2">
+  <div class="sec-header">
+    <div class="sec-num">02</div>
+    <div>
+      <div class="sec-eyebrow">Operativa</div>
+      <div class="sec-title">Después de conectar, empieza el movimiento: rutas, solicitudes y oportunidades</div>
+    </div>
+  </div>
+
+  <!-- CAMBIO 3: bloque de apertura → card estándar -->
+  <div class="card">
+    <p>Una vez que ya entiendes cómo funcionan las vinculaciones, el siguiente paso son las rutas. Aquí es donde la magia ocurre, porque en FleetChofer las rutas no son simples "ofertas" colgadas en un tablón donde todos pujan; son la herramienta para mover toda tu operativa.</p>
+    <p style="margin-top:.65rem;">Lo bueno es que puedes gestionarlo todo desde un solo sitio: públicas, recibes solicitudes, seleccionas a quién te encaja y haces el seguimiento. Puedes detallar de todo: desde horarios y urgencias hasta el tipo de carga, palets o peso.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="card-icon">🔄</span> ¿Quieres publicar, buscar ruta o buscar chófer?</div>
+    <p>Aquí la plataforma es súper flexible y se adapta a lo que te pase en el garaje ese día. Por ejemplo:</p>
+    <div class="steps">
+      <div class="step"><div class="step-num" style="background:transparent;font-size:1.1rem;">🚛</div><div class="step-text"><strong>Si tienes el camión parado:</strong> Lo que necesitas es buscar una ruta para ponerlo en marcha cuanto antes.</div></div>
+      <div class="step"><div class="step-num" style="background:transparent;font-size:1.1rem;">👷</div><div class="step-text"><strong>Si tienes la carga pero no tienes manos:</strong> Entonces lo que haces es buscar un chófer para que cubra ese servicio.</div></div>
+    </div>
+  </div>
+  <div class="card card-important">
+    <div class="card-title"><span class="card-icon">🚨</span> El "botón de pánico": Rutas Urgentes</div>
+    <p>Algo que te va a encantar es la opción de Ruta Urgente.</p>
+    <p>Si tienes una ruta para salir en menos de 24 horas, la marcas como urgente y automáticamente se pone la primera de la fila para que todo el mundo la vea y se postule rápido. No solo en tu red, si no en toda. No solo hace que "se vea la primera"; el sistema lanza una notificación directa. Es un aviso proactivo para que el problema se solucione en cuestión de minutos. Por supuesto si no tienes un contacto en tu red, antes de asignarlo a la ruta urgente tendrás que aceptarlo.</p>
+    <p>Esto va de lujo cuando te llama un chófer enfermo a última hora, para cerrar grupajes rápidos o para aprovechar esos kilómetros en vacío que tanto duelen al bolsillo.</p>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="card-icon">💎</span> Por qué no somos una "Bolsa de Cargas" al uso</div>
+    <p>Aquí hay un detalle que me encanta explicar porque marca la diferencia. En las bolsas de carga normales, la gente empieza a subastar a la baja: uno dice 500, otro 450... y al final acabas cogiendo una ruta que ni cubre gastos. En FleetChofer no funciona así.</p>
+    <div class="steps">
+      <div class="step"><div class="step-num">✓</div><div class="step-text"><strong>Precio justo:</strong> Cuando publicas, puedes poner un precio fijo o permitir que se postulen con su presupuesto.</div></div>
+      <div class="step"><div class="step-num">✓</div><div class="step-text"><strong>Sin subastas locas:</strong> Si alguien se postula, pone su valoración (por ejemplo, 500€) y ya está. No puede ver lo que han puesto otros ni rectificar para "ganar" por precio. Tú ves lo que cada uno pide de forma honesta.</div></div>
+      <div class="step"><div class="step-num">★</div><div class="step-text"><strong>La reputación manda:</strong> Quizás un chófer te pide 50€ más, pero ves que tiene una reputación de 5 estrellas e insignias perfectas. Al final, pagas ese pelín más pero te quedas con la tranquilidad de que el servicio va a ser impecable, en lugar de jugártela con alguien que tiene fallos constantes.</div></div>
+    </div>
+  </div>
+  <div class="card card-visual">
+    <div class="card-title"><span class="card-icon">💡</span> Ejemplos reales de cómo te ayuda en el día a día</div>
+    <p>Para que te hagas una idea, no pienses en las rutas como algo cerrado. Mira estos casos que nos pasan a todos:</p>
+    <div class="cases">
+      <div class="case-card"><div class="case-num">1</div><div class="case-title">El imprevisto de última hora</div><div class="case-text">Se estropea un camión o te falla alguien a las 6 de la mañana. Públicas una ruta urgente y, cómo se posiciona por encima de todas, puedes cubrir el hueco en cuestión de minutos.</div></div>
+      <div class="case-card"><div class="case-num">2</div><div class="case-title">La carga de retorno</div><div class="case-text">¿Tienes un camión que vuelve de vacío desde la otra punta del país? Buscas una carga o varias para ese trayecto y así no tiras el dinero quemando gasoil sin sentido. Puedes hacerlo de manera urgente o prepararlo con tiempo.</div></div>
+      <div class="case-card"><div class="case-num">3</div><div class="case-title">Planificación con calma</div><div class="case-text">No todo son fuegos. Puedes usarlo para dejar listas las campañas anuales, organizar rutas recurrentes o preparar grupajes para completar el camión.</div></div>
+    </div>
+  </div>
+  <!-- EXCEPCIÓN: este quote se mantiene con línea lateral, tal como pediste -->
+  <div class="quote">Y lo mejor es que, aunque la plataforma es súper completa, siempre estamos evolucionando. Si en la demo echas en falta algún detalle muy específico de tu operativa, no te preocupes; FleetChofer crece con el uso real de gente como nosotros, así que siempre estamos abiertos a mejorar esos detalles.</div>
+</div>
+
+<!-- ══════ SECCIÓN 3: REPUTACIÓN ══════ -->
+<div class="section" data-index="3">
+  <div class="sec-header">
+    <div class="sec-num">03</div>
+    <div>
+      <div class="sec-eyebrow">Tu moneda de cambio</div>
+      <div class="sec-title">La Reputación: Tu verdadera moneda de cambio</div>
+    </div>
+  </div>
+  <div class="card">
+    <p>Antes de seguir, tenemos que pararnos aquí, porque en FleetChofer la reputación es lo más importante. No es un adorno para el perfil; es lo que hace que una empresa te elija a ti antes que a otra que cobra menos. Es, literalmente, tu carta de presentación para que quieran ser tus "amigos" operativos.</p>
+  </div>
+  <div class="card card-important">
+    <div class="card-title"><span class="card-icon">🤝</span> El sistema de Triple Validación</div>
+    <p>Para que nada se escape y todo sea real, cada servicio tiene tres valoraciones obligatorias para poder cerrar la operativa:</p>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>La del Chófer:</strong> Cómo ha sido su experiencia.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text"><strong>La del Receptor:</strong> Cómo ha sido la descarga y el trato en destino.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><strong>La de la Empresa:</strong> Una vez finalizado el viaje.</div></div>
+    </div>
+    <div class="divider"></div>
+    <p>Y lo mejor: es todo anónimo. Así todo el mundo puede ser sincero sin miedo a represalias, y lo que ves en el perfil es la verdad pura.</p>
+  </div>
+  <div class="card card-visual">
+    <div class="card-title"><span class="card-icon">🎖</span> El lenguaje de las Insignias (El ADN de FleetChofer)</div>
+    <p>Aquí las insignias no son dibujos vacíos, son el reflejo de tu "fuego" profesional. Estos son algunos ejemplos (¡hay muchísimas más!):</p>
+    <div class="badge-section-label" style="color:var(--green);">✦ POSITIVAS — Las que mantienen viva la llama</div>
+    <div class="badge-grid">
+      <div class="badge-card positive"><div class="badge-name">🔥 Llama Viva</div><div class="badge-desc">Para los que clavan la puntualidad. Su servicio nunca se apaga.</div></div>
+      <div class="badge-card positive"><div class="badge-name">⚡ Chispa Operativa</div><div class="badge-desc">Se la lleva quien es resolutivo y soluciona incidencias antes de que se hagan grandes.</div></div>
+      <div class="badge-card positive"><div class="badge-name">💥 Efecto Combustión</div><div class="badge-desc">Para los que no solo conducen, sino que ayudan en la carga/descarga y aceleran el proceso.</div></div>
+      <div class="badge-card positive"><div class="badge-name">🤜 Calor de Equipo</div><div class="badge-desc">Por un trato humano, educado y excelente con el resto de compañeros.</div></div>
+    </div>
+    <div class="badge-section-label" style="color:#FFD700;margin-top:1.25rem;">★ DE FLEETCHOFER — Validadas por la plataforma</div>
+    <div class="badge-grid">
+      <div class="badge-card platform"><div class="badge-name">🥇 Llama de Oro</div><div class="badge-desc">El máximo reconocimiento. 100 rutas seguidas con cero incidencias.</div></div>
+      <div class="badge-card platform"><div class="badge-name">🛡 Fuego Blindado</div><div class="badge-desc">El sello que damos cuando certificamos que toda tu documentación está perfecta y al día. Validada por nosotros.</div></div>
+      <div class="badge-card platform"><div class="badge-name">🕯 Antorcha Veterana</div><div class="badge-desc">Para los usuarios con una actividad constante y una trayectoria impecable en la red.</div></div>
+    </div>
+    <div class="badge-section-label" style="color:var(--orange);margin-top:1.25rem;">✘ NEGATIVAS — Lo que apaga el servicio</div>
+    <div class="badge-grid">
+      <div class="badge-card negative"><div class="badge-name">🧯 Extintor</div><div class="badge-desc">Para quien llega y corta el ritmo de trabajo o se niega a colaborar cuando hace falta.</div></div>
+      <div class="badge-card negative"><div class="badge-name">🪨 Ceniza</div><div class="badge-desc">Cuando hay falta de educación o un trato que deja el ambiente frío y desagradable.</div></div>
+      <div class="badge-card negative"><div class="badge-name">💨 Humo</div><div class="badge-desc">Para los que no informan, no aparecen o dan datos que no son reales.</div></div>
+      <div class="badge-card negative"><div class="badge-name">💧 Fuego Mojado</div><div class="badge-desc">Cuando la documentación siempre da problemas o nunca está lista a tiempo.</div></div>
+    </div>
+  </div>
+  <div class="card card-visual">
+    <div class="card-title"><span class="card-icon">📱</span> ¿Cómo se ve tu perfil al final?</div>
+    <p>Cuando un cliente pinche en tu perfil, verá la radiografía real de tu trabajo:</p>
+    <div class="profile-preview">
+      <div class="profile-stars">
+        <div class="stars">★★★★★</div>
+        <div class="rating">4.9</div>
+        <span style="font-size:.78rem;color:var(--text-dim);margin-left:.25rem;">Puntuación media</span>
+      </div>
+      <p style="font-size:.82rem;color:#aaa;margin-bottom:.65rem;">Comentarios verificados · Estrellas de cada viaje con su comentario</p>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:.4rem;font-family:var(--bebas);letter-spacing:1px;">Tu vitrina de fuego</div>
+      <div class="profile-row">
+        <span class="profile-tag tag-green">12 Llamas Vivas</span>
+        <span class="profile-tag tag-green">5 Chispas Operativas</span>
+        <span class="profile-tag tag-gold">1 Llama de Oro</span>
+        <span class="profile-tag tag-zero">0 Extintores</span>
+      </div>
+    </div>
+    <p style="margin-top:.9rem;">Esa transparencia es la que te permite decidir con seguridad. ¿Te quedas con el que ofrece un precio por los suelos pero tiene 3 insignias de "Humo", o con el que tiene la "Llama de Oro" y te garantiza que la operativa va a salir perfecta? La tranquilidad no tiene precio.</p>
+  </div>
+
+  <!-- CAMBIO 4: el cuadrado termina en "justicia operativa" y la cita queda fuera -->
+  <div class="card">
+    <div class="card-title"><span class="card-icon">🛡</span> Protección de tu reputación: Justo y real</div>
+    <p>Para que te quedes tranquilo, sabemos que, a veces, las cosas en la carretera se tuercen y no siempre es culpa de uno. Por eso, en FleetChofer la reputación no es una "vía libre" para que alguien te perjudique injustamente solo porque le caigas mal.</p>
+    <p style="margin-top:.65rem;">¿Qué pasa si recibes una insignia negativa con la que no estás de acuerdo?</p>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Reclamación directa:</strong> Si consideras que una valoración o insignia no es justa, puedes abrir una reclamación de inmediato.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Investigación de FleetChofer:</strong> En ese momento, nosotros entramos como mediadores. Hablamos con ambas partes e investigamos qué ha pasado realmente basándonos en los datos de la operativa.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Justicia operativa:</strong> Si comprobamos que la insignia es incorrecta, la retiramos.</div></div>
+    </div>
+  </div>
+  <!-- Cita FUERA del cuadrado, con línea lateral -->
+  <div class="quote">En definitiva, nada se queda grabado a fuego en tu perfil si no es verdad. Queremos que tu reputación sea tu mayor orgullo, y nosotros nos encargamos de que sea siempre un reflejo fiel y justo de tu trabajo.</div>
+</div>
+
+<!-- ══════ SECCIÓN 4: CRM ══════ -->
+<div class="section" data-index="4">
+  <div class="sec-header">
+    <div class="sec-num">04</div>
+    <div>
+      <div class="sec-eyebrow">Centro de mando</div>
+      <div class="sec-title">El CRM: Tu centro de mando (Adiós al caos)</div>
+    </div>
+  </div>
+  <div class="card">
+    <p>Una vez que aceptas una vinculación, ese perfil deja de ser un "desconocido" y pasa a tu CRM operativo.</p>
+  </div>
+  <div class="card card-important">
+    <div class="card-title"><span class="card-icon">📱</span> Todo en un mismo lugar (y con trazabilidad)</div>
+    <p>Para que podamos responder por lo que pasa en tu operativa, todo debe ocurrir dentro de FleetChofer: las llamadas, los chats, la documentación... ¡todo!</p>
+    <div class="warn-box" style="margin-top:.9rem;">
+      <span class="warn-icon">⚡</span>
+      <span><strong>Ventaja enorme:</strong> No dependes de la memoria ni del "creo que me dijo esto". Si haces la llamada desde el CRM, queda asociada a la ruta o incidencia. Así, si hay un problema, hay una prueba real y ordenada de lo que se habló.</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="card-icon">💼</span> Los dos usos del CRM</div>
+    <p>El CRM tiene doble potencia para que no tengas que saltar de una app a otra:</p>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Contactos de la Red:</strong> Todos los que has conocido a través de las "solicitudes de amistad operativa" dentro de la plataforma.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Tus contactos de siempre:</strong> Puedes añadir a tus proveedores y clientes de toda la vida. Así, FleetChofer se convierte en tu herramienta de trabajo diaria para toda tu agenda, no solo para lo nuevo.</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="card-icon">📝</span> Gestión profesional sin esfuerzo</div>
+    <p>Dentro de cada ficha puedes poner notas privadas, etiquetas y ver el historial completo de cada relación. Es trabajar con memoria: entras al perfil y sabes perfectamente quién es, qué tal trabajó la última vez y qué documentación tiene vigente.</p>
+  </div>
+</div>
+
+<!-- ══════ SECCIÓN 5: DOCUMENTACIÓN ══════ -->
+<div class="section" data-index="5">
+  <div class="sec-header">
+    <div class="sec-num">05</div>
+    <div>
+      <div class="sec-eyebrow">Tu escudo operativo</div>
+      <div class="sec-title">Documentación: Tu escudo operativo (y cómo brillar más)</div>
+    </div>
+  </div>
+  <div class="card">
+    <p>En logística, los papeles son el mayor dolor de cabeza. Por eso, en FleetChofer la documentación no es un simple archivo de "subir y ya"; es un sistema para trabajar con seguridad inmediata.</p>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="card-icon">📄</span> Dos formas de gestionar tu "papeleo"</div>
+    <div style="margin-bottom:.9rem;">
+      <div class="red-label">OPCIÓN 1 — Gestión Básica (Hazlo tú mismo)</div>
+      <p>Cada empresa o chófer sube sus documentos. En su ficha verás una tarjeta con semáforos: verificado, vigente, próximo a caducar o falta. Puedes descargarlos y revisarlos tú mismo antes de cada ruta. Es útil, pero requiere que estés pendiente.</p>
+    </div>
+    <div class="divider"></div>
+    <!-- CAMBIO 5: caja Opción 2 en rojo intenso con glow CONSTANTE (no hover) -->
+    <div class="opcion2-box">
+      <div class="red-label" style="margin-bottom:.65rem;">⭐ OPCIÓN 2 — Gestión FleetChofer (Tranquilidad Total · RECOMENDADO)</div>
+      <p>Aquí es donde realmente marcamos la diferencia y donde tú ganas más prestigio. Nosotros nos encargamos de todo:</p>
+      <div class="steps">
+        <div class="step"><div class="step-num">✓</div><div class="step-text"><strong>Validación Humana:</strong> No es un robot; nuestro equipo revisa documento por documento, asegurando que se vean claros y sean válidos.</div></div>
+        <div class="step"><div class="step-num">⏰</div><div class="step-text"><strong>Proactividad:</strong> Un mes antes de que algo caduque, ya estamos contactando con el chófer o la empresa para pedir el nuevo papel.</div></div>
+        <div class="step"><div class="step-num">🛡</div><div class="step-text"><strong>Reputación Máxima:</strong> Solo con este servicio obtienes la insignia de "Fuego Blindado". Cuando una empresa ve ese sello, sabe que no tiene ni que abrir los archivos; confía ciegamente porque FleetChofer ya ha puesto la mano en el fuego por esa documentación.</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="card-icon">✨</span> ¿Por qué dejar que nosotros llevemos tus papeles?</div>
+    <div class="two-col" style="margin-top:.75rem;">
+      <div class="col-card">
+        <div class="col-label">Si eres empresa</div>
+        <div class="col-text">Ahorras cientos de horas de gestión. Olvídate de tener a alguien pidiendo papeles por WhatsApp o revisando fechas de caducidad. Delegas en nosotros la validación total y el riesgo de errores; nos aseguramos de que cada camión y cada chófer tengan todo en orden y en su sitio.</div>
+      </div>
+      <div class="col-card">
+        <div class="col-label">Si eres chófer</div>
+        <div class="col-text">Ganas una reputación de hierro. Las empresas te elegirán antes que a otros porque con tu sello de "Fuego Blindado" saben que no habrá multas en inspecciones ni retrasos en las cargas.</div>
+      </div>
+    </div>
+  </div>
+  <div class="card card-important">
+    <div class="card-title"><span class="card-icon">🔑</span> Consejo de oro</div>
+    <p>No veas la documentación como "tener papeles". Mírala como la llave que abre las mejores rutas. Con el servicio gestionado por FleetChofer, tu única preocupación será conducir o cargar; del resto nos encargamos nosotros.</p>
+  </div>
+</div>
+
+<!-- ══════ SECCIÓN 6: TACÓGRAFO ══════ -->
+<div class="section" data-index="6">
+  <div class="sec-header">
+    <div class="sec-num">06</div>
+    <div>
+      <div class="sec-eyebrow">Salud operativa</div>
+      <div class="sec-title">Tacógrafo Inteligente: El pulso de la ruta y tu guía en el camino</div>
+    </div>
+  </div>
+  <div class="card">
+    <p>En FleetChofer, el tacógrafo no es solo un registro legal para evitar multas; es un sensor de salud operativa que te ayuda a decidir en tiempo real. Además de compartir (esa ruta) el estado del tacógrafo con la empresa, así eliminas las llamadas innecesarias para dar explicaciones; ellos ven en tiempo real que estás cumpliendo con la normativa y por qué estás parado.</p>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="card-icon">⚙️</span> Control normativo completo</div>
+    <div class="steps">
+      <div class="step"><div class="step-num">📋</div><div class="step-text"><strong>Control Normativo Completo:</strong> Registra automáticamente horas de conducción, pausas y descansos diarios o semanales según la normativa EU 561/2006.</div></div>
+      <div class="step"><div class="step-num">❓</div><div class="step-text"><strong>¿Parada legal o problema?:</strong> Si un camión se detiene, sabrás al instante si es porque toca descanso por ley o si hay una avería o incidencia que requiere tu atención inmediata.</div></div>
+      <div class="step"><div class="step-num">📄</div><div class="step-text"><strong>Informes listos para Inspección:</strong> Genera informes de auditoría exportables en PDF con toda la trazabilidad y el sello de la plataforma, listos para cualquier inspección oficial.</div></div>
+    </div>
+  </div>
+  <div class="card card-important">
+    <div class="card-title"><span class="card-icon">🗺</span> Tu asistente de paradas: No pares en cualquier sitio</div>
+    <p>Esta es la parte que más te va a facilitar la vida si no conoces bien la ruta o vas con el tiempo justo:</p>
+    <p>El sistema calcula por ti los mejores puntos para descansar. Cuando se acerca el momento de parar, FleetChofer te recomienda las áreas de servicio ideales según tu ubicación de parada. No solo te dice dónde parar, sino qué servicios vas a encontrar: plazas específicas para camiones, duchas, restaurantes, tomas de agua o puntos de luz. Así, no pierdes tiempo buscando un sitio donde quepa el camión o que tenga lo que necesitas; el sistema lo organiza para que tú solo te preocupes de descansar bien.</p>
+  </div>
+</div>
+
+<!-- ══════ SECCIÓN 7: PLANIFICACIÓN ══════ -->
+<div class="section" data-index="7">
+  <div class="sec-header">
+    <div class="sec-num">07</div>
+    <div>
+      <div class="sec-eyebrow">Visión de futuro</div>
+      <div class="sec-title">Planificación: Adelántate al caos</div>
+    </div>
+  </div>
+  <div class="card">
+    <p>La planificación es tu visión de futuro. Esta sección de la demo está pensada para que dejes de "apagar fuegos" y empieces a organizar tu operativa con antelación.</p>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="card-icon">📅</span> Herramientas de planificación</div>
+    <div class="steps">
+      <div class="step"><div class="step-num">⚙</div><div class="step-text"><strong>Programación de Recursos:</strong> Organiza tus rutas y asigna chóferes o vehículos con días o semanas de antelación.</div></div>
+      <div class="step"><div class="step-num">📆</div><div class="step-text"><strong>Calendarios de Disponibilidad:</strong> Visualiza de un vistazo quién está libre y qué camiones están listos para salir.</div></div>
+      <div class="step"><div class="step-num">🔮</div><div class="step-text"><strong>Previsión de Operaciones:</strong> Crea un circuito de trabajo fluido para que, cuando llegue el día, la ejecución sea automática y sin sorpresas.</div></div>
+      <div class="step"><div class="step-num">📊</div><div class="step-text"><strong>De la intuición al dato:</strong> No planifiques "de memoria". Usa el historial del CRM y las rutas recurrentes para montar una estructura logística sólida.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ SECCIÓN 8: PAGOS ══════ -->
+<div class="section" data-index="8">
+  <div class="sec-header">
+    <div class="sec-num">08</div>
+    <div>
+      <div class="sec-eyebrow">Claridad total</div>
+      <div class="sec-title">Pagos: claridad, trazabilidad y seguridad total</div>
+    </div>
+  </div>
+  <div class="card">
+    <p>Llegamos a una de las partes más sensibles: los pagos. En FleetChofer, el dinero no es un "ya veremos"; está integrado directamente en la operativa para que todo sea transparente.</p>
+  </div>
+  <div class="card card-important">
+    <div class="card-title"><span class="card-icon">🔒</span> Pagos Garantizados y Seguridad</div>
+    <p>La plataforma utiliza un sistema de "pagos garantizados" con una lógica de seguridad muy clara: el dinero se vincula a la ruta y al estado del servicio. En la demo verás estados como:</p>
+    <div class="payment-states">
+      <div class="pay-state pay-pending">⏳ Pendiente</div>
+      <div class="pay-state pay-retained">🔒 Retenido</div>
+      <div class="pay-state pay-released">✅ Liberado</div>
+      <div class="pay-state pay-completed">🏁 Completado</div>
+    </div>
+    <div class="divider"></div>
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-label">Para el Chófer · Tranquilidad</div>
+        <div class="col-text">Se acabó la incertidumbre. En cuanto se entrega la carga, se realiza el pago automáticamente. Tu trabajo se cobra al momento de finalizar el servicio.</div>
+      </div>
+      <div class="col-card">
+        <div class="col-label">Para la Empresa · Flexibilidad</div>
+        <div class="col-text">Entendemos la realidad financiera del sector. Por eso, aunque el chófer cobra al descargar, ofrecemos a las empresas opciones de pago adaptadas (como pagos a 90 días) para que podáis gestionar vuestra tesorería sin asfixiar la operativa.</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="card-icon">📄</span> Todo bajo control</div>
+    <p>Desde esta sección, podrás acceder a:</p>
+    <div class="steps">
+      <div class="step"><div class="step-num">📋</div><div class="step-text"><strong>Historial de movimientos:</strong> Trazabilidad económica total de cada viaje.</div></div>
+      <div class="step"><div class="step-num">🧾</div><div class="step-text"><strong>Documentación fiscal:</strong> Descarga directa de facturas o justificantes en PDF para que tu contabilidad esté siempre al día.</div></div>
+    </div>
+  </div>
+  <div class="quote">En resumen: FleetChofer elimina las "zonas grises" y las discusiones por dinero. El objetivo es que la plataforma actúe como un entorno de intermediación segura donde cada parte sabe exactamente cuándo y cómo se mueve su dinero.</div>
+</div>
+
+<!-- ══════ SECCIÓN 9: COMUNICACIÓN ══════ -->
+<div class="section" data-index="9">
+  <div class="sec-header">
+    <div class="sec-num">09</div>
+    <div>
+      <div class="sec-eyebrow">Todo bajo control</div>
+      <div class="sec-title">Comunicación y Notificaciones: Todo bajo control y con un código de colores 🎨</div>
+    </div>
+  </div>
+  <div class="card">
+    <p>En logística, la información es tan importante como la carga. Para que FleetChofer pueda responder por tu operativa, toda la comunicación debe ser interna. Olvídate de perseguir audios de WhatsApp; aquí todo es profesional, seguro y está a un clic de distancia.</p>
+  </div>
+  <div class="card card-visual">
+    <div class="card-title"><span class="card-icon">💬</span> Las tres vías de contacto directo</div>
+    <div class="channels">
+      <div class="channel">
+        <div class="channel-icon">📞</div>
+        <div class="channel-name">Llamada VoIP</div>
+        <div class="channel-desc">Llama directamente desde la ficha del CRM. Un toque y ya estás hablando con el contacto a través de la app, sin revelar tu número personal.</div>
+      </div>
+      <div class="channel">
+        <div class="channel-icon">⚡</div>
+        <div class="channel-name">Chat instantáneo</div>
+        <div class="channel-desc">Para lo rápido y el día a día. Ideal para coordinar la carga o avisar de una llegada al momento.</div>
+      </div>
+      <div class="channel">
+        <div class="channel-icon">📬</div>
+        <div class="channel-name">Mensajes (Bandeja)</div>
+        <div class="channel-desc">Para lo formal. Úsalo para enviar certificados o acuerdos que necesites que queden guardados para siempre en el historial.</div>
+      </div>
+    </div>
+  </div>
+  <div class="card card-important">
+    <div class="card-title"><span class="card-icon">🔔</span> Notificaciones inteligentes: El semáforo de tu operativa</div>
+    <p>Lo que hace genial a FleetChofer es que puedes leer sin abrir. El sistema utiliza un código de colores idéntico a los roles y servicios de la plataforma para que, con un solo vistazo, sepas qué prioridad tiene cada aviso.</p>
+    <p style="margin-top:.75rem;">¿La ventaja real? Con un simple vistazo decides qué es urgente (como una incidencia morada) y qué puede esperar (como un aviso de pago rosa o un documento azul). Además, puedes dejarlas en "no leídas" para repasarlas con calma cuando tengas un respiro.</p>
+  </div>
+  <!-- CAMBIO 6: warn-box → quote con línea lateral e cursiva -->
+  <div class="quote"><strong>Recuerda:</strong> No compartas datos privados (teléfonos o emails) por el chat; el sistema protege tu privacidad y bloquea información sensible automáticamente para mantenerte seguro.</div>
+</div>
+
+<!-- ══════ SECCIÓN 10: CENTRO OPERACIONES ══════ -->
+<div class="section" data-index="10">
+  <div class="sec-header">
+    <div class="sec-num">10</div>
+    <div>
+      <div class="sec-eyebrow">Control total en vivo</div>
+      <div class="sec-title">Centro de Operaciones: El Control Total en Vivo 🗼</div>
+    </div>
+  </div>
+  <div class="card">
+    <p>Esta es la parte de la demo donde FleetChofer enseña su verdadero músculo operativo. No es una base de datos estática; es una Torre de Control activa que te permite dominar absolutamente todo lo que ocurre en tu logística en tiempo real.</p>
+  </div>
+  <div class="card card-important">
+    <div class="card-title"><span class="card-icon">🚀</span> 10.1 Seguimiento en Vivo: Tu operativa latido a latido</div>
+    <p>Aquí es donde ves la jornada en movimiento. No necesitas preguntar a nadie qué está pasando, porque lo tienes todo delante. En este panel se centraliza absolutamente cada acción que ocurre en este preciso instante:</p>
+    <div class="steps">
+      <div class="step"><div class="step-num">👁</div><div class="step-text"><strong>Visibilidad 360°:</strong> Ves desde un camión que acaba de arrancar su ruta hasta una nueva solicitud que te acaba de llegar, un pago que se ha liberado o un documento que un chófer acaba de actualizar. Todo lo que se "mueve" en tu departamento, late en esta pantalla.</div></div>
+      <div class="step"><div class="step-num">🎛</div><div class="step-text"><strong>Control Absoluto de cada Ruta:</strong> Cada servicio activo tiene su propio bloque detallado. De un solo vistazo controlas: la Carga (tipo de mercancía, palets, peso exacto) y los Protagonistas (chófer y camión específico).</div></div>
+    </div>
+    <div class="divider"></div>
+    <p style="font-size:.875rem;color:#ccc;margin-bottom:.75rem;"><strong>Navegación Hiperconectada (Sin perder un segundo):</strong> Esta es la clave del control total. Dentro de cada cuadro de ruta, tienes acceso directo e inmediato:</p>
+    <div style="display:flex;flex-wrap:wrap;gap:.65rem;">
+      <div style="flex:1;min-width:140px;border:1px solid rgba(255,0,0,.2);border-radius:4px;padding:.75rem;text-align:center;"><div style="font-size:1.1rem;margin-bottom:.35rem;">👤</div><div style="font-size:.78rem;color:var(--text-dim);">Perfiles: chófer o ficha técnica del camión</div></div>
+      <div style="flex:1;min-width:140px;border:1px solid rgba(255,0,0,.35);border-radius:4px;padding:.75rem;text-align:center;"><div style="font-size:1.1rem;margin-bottom:.35rem;">📍</div><div style="font-size:.78rem;color:var(--red);">Botón de Geolocalización en tiempo real</div></div>
+      <div style="flex:1;min-width:140px;border:1px solid rgba(255,0,0,.2);border-radius:4px;padding:.75rem;text-align:center;"><div style="font-size:1.1rem;margin-bottom:.35rem;">⏱️</div><div style="font-size:.78rem;color:var(--text-dim);">Botón de Tacógrafo: tiempos de conducción</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="card-icon">🚨</span> 10.2 Gestión de Incidencias: Capacidad de reacción inmediata</div>
+    <p>La otra mitad del panel es donde gestionas los imprevistos para que no se conviertan en desastres. Aquí es donde pasas de "recibir problemas" a "ejecutar soluciones":</p>
+    <div class="steps">
+      <div class="step"><div class="step-num">⚡</div><div class="step-text"><strong>Gestión y Delegación:</strong> Si surge un retraso, una avería o un chófer se pone enfermo, no solo lo ves. Puedes gestionar la incidencia tú mismo o delegarla al instante a otro departamento. ¿Fallo mecánico? Envías el aviso directo a mantenimiento o al mecánico responsable.</div></div>
+      <div class="step"><div class="step-num">📋</div><div class="step-text"><strong>Trazabilidad de Hierro:</strong> Cada paso que das queda registrado. Quién ha dado la orden, a quién se le ha asignado la solución y qué se ha decidido. No hay llamadas que se lleva el viento; hay una cadena de resolución clara con hora y fecha.</div></div>
+      <div class="step"><div class="step-num">🔄</div><div class="step-text"><strong>Resolución Activa:</strong> Verás cómo el sistema permite reaccionar enviando nuevas rutas GPS al camión o preparando vehículos de sustitución en tiempo récord.</div></div>
+    </div>
+  </div>
+  <div class="quote">En definitiva: El Centro de Operaciones es el lugar donde FleetChofer une el CRM, las rutas, los documentos y los pagos en un solo mando de control. Es la herramienta que te permite dejar de ser un bombero que apaga fuegos y convertirte en el director de una operativa impecable.</div>
+</div>
+
+<!-- ══════ SECCIÓN 11: INTELIGENCIA ══════ -->
+<div class="section" data-index="11">
+  <div class="sec-header">
+    <div class="sec-num">11</div>
+    <div>
+      <div class="sec-eyebrow">Tu consultor 24/7</div>
+      <div class="sec-title">Inteligencia Operativa: Tu Consultor de Estrategia 24/7 🧠</div>
+    </div>
+  </div>
+  <div class="card">
+    <p>Después de ver cómo late tu operativa en vivo, llegamos al punto donde los datos dejan de ser solo números y empiezan a generar dinero y tiempo libre para ti. La Inteligencia Operativa no es un archivo de recuerdos; es una capa que analiza patrones para que dejes de apagar fuegos y empieces a evitarlos.</p>
+  </div>
+  <div class="card card-visual">
+    <div class="card-title"><span class="card-icon">📊</span> 11.1 Informes Milimétricos: La radiografía total</div>
+    <p>La plataforma recoge, cruza y relaciona absolutamente todo lo que pasa por ella. No se le escapa ni un detalle. Tendrás informes detallados de:</p>
+    <div class="intel-grid">
+      <div class="intel-card"><div class="intel-icon">🚛</div><div class="intel-title">Chóferes y Camiones</div><div class="intel-text">Historial individual de rendimiento, incidencias y eficiencia.</div></div>
+      <div class="intel-card"><div class="intel-icon">🗺</div><div class="intel-title">Rutas y Servicios</div><div class="intel-text">Registros de seguimiento, hitos, tiempos exactos y evidencias de cada operación.</div></div>
+      <div class="intel-card"><div class="intel-icon">💳</div><div class="intel-title">Pagos y Finanzas</div><div class="intel-text">Trazabilidad económica absoluta de cada movimiento.</div></div>
+      <div class="intel-card"><div class="intel-icon">💬</div><div class="intel-title">Comunicaciones</div><div class="intel-text">Todo el registro de chats y llamadas vinculados a cada servicio.</div></div>
+    </div>
+  </div>
+  <div class="card card-important">
+    <div class="card-title"><span class="card-icon">🚀</span> 11.2 El Apartado de Mejora: Tu ventaja competitiva</div>
+    <p>Aquí ocurre la magia. FleetChofer analiza esos informes milimétricos y te ofrece recomendaciones de mejora que quizás ni te habías planteado. Son propuestas de solución basadas en hechos reales para optimizar tu día a día:</p>
+    <div class="steps">
+      <div class="step"><div class="step-num">🗺</div><div class="step-text"><strong>Optimización de Rutas:</strong> Si el sistema detecta que una ruta acumula siempre retrasos en el mismo tramo, te avisará de que existe una alternativa mejor para ahorrar tiempo.</div></div>
+      <div class="step"><div class="step-num">👤</div><div class="step-text"><strong>Especialización de Chóferes:</strong> Dejarás de basarte en intuiciones. El sistema te mostrará si un chófer rinde mejor en trayectos largos o en servicios específicos, permitiéndote asignar siempre al mejor para cada trabajo.</div></div>
+      <div class="step"><div class="step-num">🚚</div><div class="step-text"><strong>Gestión de Flota Inteligente:</strong> ¿Un vehículo da problemas en rutas largas pero es impecable en cortas? Ahora lo sabrás con datos y podrás reorganizar tu flota para exprimir su rentabilidad.</div></div>
+      <div class="step"><div class="step-num">⚙️</div><div class="step-text"><strong>Cuellos de Botella:</strong> Si un punto de carga siempre genera esperas, podrás anticiparte y ajustar la operativa antes de que el camión llegue al destino.</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="card-icon">🔍</span> 11.3 Gestión de Auditoría: Tu seguro de vida ante inspecciones (La Solución)</div>
+    <p>Aquí es donde la Inteligencia Operativa se convierte en tu mejor abogado. Olvídate de buscar entre montañas de carpetas o de perder días preparando documentación cuando llega un auditor o un inspector.</p>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Informe de Auditoría en 1 clic:</strong> El sistema genera informes completos y detallados de actividad, listos para exportar (PDF y otros formatos).</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Adiós a la burocracia:</strong> Ante una inspección, no necesitas pedir 50 papeles diferentes. FleetChofer ofrece una trazabilidad total entre las partes. Enseñando la plataforma o el informe exportado, el inspector tiene acceso a tiempos de conducción, descansos, incidencias resueltas y estados de cumplimiento normativo de forma inmediata.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Validez y Transparencia:</strong> Al estar todo registrado con sello de la plataforma, eliminas cualquier duda sobre la veracidad de los datos. Es la herramienta definitiva para auditorías internas o externas: presentas la documentación verificada y te olvidas de la pérdida de tiempo que supone la burocracia tradicional.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ SECCIÓN 12: CONCLUSIÓN ══════ -->
+<div class="section" data-index="12">
+  <div class="sec-header">
+    <div class="sec-num">12</div>
+    <div>
+      <div class="sec-eyebrow">Todo encaja</div>
+      <div class="sec-title">La sensación de que, por fin, todo encaja 🏁</div>
+    </div>
+  </div>
+  <div class="card">
+    <p>Si has recorrido la demo paso a paso, la idea final no es simplemente que FleetChofer "tiene muchas funciones". Herramientas hay muchas, pero soluciones reales hay muy pocas.</p>
+    <p style="margin-top:.65rem;">La sensación con la que debes quedarte es la de un ecosistema donde nada queda al azar. Hemos cogido todo lo que normalmente está roto, disperso o duplicado en la logística (llamadas perdidas, WhatsApps caóticos, papeles caducados) y lo hemos unido en un solo lugar.</p>
+  </div>
+  <div class="card card-important">
+    <div class="card-title"><span class="card-icon">🧱</span> Tu nueva estructura de acero</div>
+    <p>FleetChofer es ese sitio donde la red profesional, el CRM, las rutas, los pagos, la documentación y el control operativo bailan al mismo ritmo. No es solo una pantalla para "ver datos"; es una plataforma para trabajar de verdad:</p>
+    <div class="pillars">
+      <div class="pillar"><div class="pillar-icon">🎛</div><div class="pillar-title">Con más control</div><div class="pillar-text">Porque ves latir tu operativa en vivo.</div></div>
+      <div class="pillar"><div class="pillar-icon">🧭</div><div class="pillar-title">Con más contexto</div><div class="pillar-text">Porque cada ruta tiene un historial y una cara detrás.</div></div>
+      <div class="pillar"><div class="pillar-icon">🧯</div><div class="pillar-title">Con menos caos</div><div class="pillar-text">Porque la burocracia ya no te quita el sueño.</div></div>
+      <div class="pillar"><div class="pillar-icon">📡</div><div class="pillar-title">Con decisiones inteligentes</div><div class="pillar-text">Porque tus pasos ya no son a ciegas, sino basados en datos reales.</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="card-icon">🤝</span> Nuestra promesa</div>
+    <p>Al terminar este recorrido, queremos que sientas que FleetChofer no viene a decirte cómo hacer tu trabajo, sino a hacerlo más fácil, más rentable y, sobre todo, mucho más tranquilo. Por eso si en algún momento del recorrido no te has sentido así, o si crees que hay algo que podríamos mejorar para que tu día a día sea más fácil, no dudes en decírnoslo. Precisamente para eso es esta prueba piloto.</p>
+    <p>Nosotros no pretendemos saberlo todo; de hecho, lo que sabemos es gracias a vuestras historias en la carretera y en el almacén. Queremos seguir sumando vuestras experiencias para que, entre todos, podamos crear la llama perfecta que ilumine el futuro de la logística.</p>
+  </div>
+  <div class="contact-card">
+    <div class="contact-title">🔥 Bienvenido al lugar donde dejas de apagar fuegos para empezar a liderar la ruta.</div>
+    <div style="font-family:var(--bebas);font-size:.95rem;color:var(--text-dim);letter-spacing:3px;margin-bottom:1.75rem;">FleetChofer by Clara: La llama que conecta empresas y conductores</div>
+    <div class="contact-items">
+      <div class="contact-item"><span>📱</span><span>679 362 474</span></div>
+      <div class="contact-item"><span>✉️</span><span>clara@fleetchoferbyclara.com</span></div>
+      <div class="contact-item"><span>🌐</span><span>www.fleetchoferbyclara.com</span></div>
+    </div>
+  </div>
+  <div class="tagline-footer">FleetChofer by Clara · La llama que conecta empresas y conductores</div>
+</div>
+
+    </div><!-- /main -->
+  </div><!-- /layout -->
+
+  <div id="bottomnav">
+    <button class="nav-btn nav-btn-prev" id="btn-prev" onclick="navigate(-1)">← Anterior</button>
+    <div class="sec-counter">Sección <span id="cnt-cur">1</span> de <span id="cnt-tot">13</span></div>
+    <button class="nav-btn nav-btn-next" id="btn-next" onclick="navigate(1)">Siguiente →</button>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+const SECTIONS=[
+  {short:'00 · Bienvenida'},{short:'01 · Red operativa'},{short:'02 · Rutas'},
+  {short:'03 · Reputación'},{short:'04 · CRM'},{short:'05 · Documentación'},
+  {short:'06 · Tacógrafo'},{short:'07 · Planificación'},{short:'08 · Pagos'},
+  {short:'09 · Comunicación'},{short:'10 · Centro Ops'},{short:'11 · Inteligencia'},
+  {short:'12 · Conclusión'}
+];
+let current=0,paused=false;
+const total=SECTIONS.length;
+
+/* ── PARTICLES ── */
+function createParticles(){
+  const c=document.getElementById('particles');
+  const configs=[
+    {count:22,minSz:2,maxSz:4,colors:['#FF0000','#FF3300','#FF1100'],minDur:7,maxDur:12,glow:3},
+    {count:8,minSz:4,maxSz:7,colors:['#FF0000','#FF4400'],minDur:12,maxDur:20,glow:5}
+  ];
+  configs.forEach(cfg=>{
+    for(let i=0;i<cfg.count;i++){
+      const s=document.createElement('div');
+      s.className='spark';
+      const sz=cfg.minSz+Math.random()*(cfg.maxSz-cfg.minSz);
+      const col=cfg.colors[Math.floor(Math.random()*cfg.colors.length)];
+      const dur=cfg.minDur+Math.random()*(cfg.maxDur-cfg.minDur);
+      s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;background:${col};animation-duration:${dur}s;animation-delay:${Math.random()*dur}s;box-shadow:0 0 ${sz*cfg.glow}px ${col};filter:blur(${sz>5?.5:0}px);`;
+      c.appendChild(s);
+    }
+  });
+}
+
+/* ── SIDEBAR ── */
+function buildNav(){
+  const nav=document.getElementById('nav-items');
+  SECTIONS.forEach((s,i)=>{
+    const d=document.createElement('div');
+    d.className='nav-item'+(i===0?' active':'');
+    d.innerHTML=`<div class="nav-num">${String(i).padStart(2,'0')}</div><div class="nav-text">${s.short}</div><div class="nav-dot"></div>`;
+    d.onclick=()=>goTo(i);
+    nav.appendChild(d);
+  });
+  document.getElementById('cnt-tot').textContent=total;
+}
+
+/* ── NAVIGATION ── */
+function goTo(idx){
+  if(idx<0||idx>=total)return;
+  document.querySelectorAll('.section')[current].classList.remove('active');
+  const pn=document.querySelectorAll('.nav-item')[current];
+  pn.classList.remove('active');pn.classList.add('done');
+  current=idx;
+  document.querySelectorAll('.section')[current].classList.add('active');
+  const cn=document.querySelectorAll('.nav-item')[current];
+  cn.classList.add('active');cn.classList.remove('done');
+  cn.scrollIntoView({behavior:'smooth',block:'nearest'});
+  document.getElementById('main').scrollTo({top:0,behavior:'smooth'});
+  updateUI();
+}
+function navigate(dir){goTo(current+dir);}
+
+function updateUI(){
+  const pct=Math.round((current/(total-1))*100);
+  document.getElementById('progress-fill').style.width=pct+'%';
+  document.getElementById('progress-section').textContent=SECTIONS[current].short;
+  document.getElementById('progress-pct').textContent=pct+'%';
+  document.getElementById('cnt-cur').textContent=current+1;
+  document.getElementById('btn-prev').disabled=current===0;
+  const n=document.getElementById('btn-next');
+  if(current===total-1){n.disabled=true;n.textContent='✓ Completado';}
+  else{n.disabled=false;n.innerHTML='Siguiente →';}
+}
+
+/* ── PAUSE ── */
+function togglePause(){
+  paused=!paused;
+  const b=document.getElementById('btn-pause');
+  b.textContent=paused?'▶ Continuar':'⏸ Pausar';
+  b.classList.toggle('paused',paused);
+}
+
+/* ── START ── */
+function startApp(){
+  document.getElementById('intro').classList.add('hidden');
+  document.getElementById('app').classList.add('visible');
+  setTimeout(()=>{document.getElementById('intro').style.display='none';},800);
+}
+
+/* ── KEYBOARD ── */
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('intro').classList.contains('hidden'))return;
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();navigate(1);}
+  if(e.key==='ArrowLeft')navigate(-1);
+  if(e.key==='p'||e.key==='P')togglePause();
+});
+
+createParticles();
+buildNav();
+updateUI();
+</script>
+</body>
+</html>
